@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io' show Platform;
 import '../../providers/auth_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/ad_provider.dart';
@@ -217,6 +219,37 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
           ),
+          
+          // Download Directory Section (All platforms except iOS)
+          if (!Platform.isIOS) ...[
+            const SizedBox(height: 24),
+            Text(
+              _isZhLocale(context) ? '下载' : 'Downloads',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: Text(_isZhLocale(context) ? '下载目录' : 'Download Directory'),
+                subtitle: Consumer(
+                  builder: (context, ref, _) {
+                    final path = ref.watch(downloadPathProvider);
+                    final displayPath = (path != null && path.isNotEmpty)
+                        ? path
+                        : (_isZhLocale(context) ? '默认（应用文档目录）' : 'Default (App Documents)');
+                    return Text(
+                      displayPath,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    );
+                  },
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _showDownloadPathDialog(context, ref),
+              ),
+            ),
+          ],
           
           const SizedBox(height: 24),
 
@@ -559,6 +592,106 @@ class SettingsScreen extends ConsumerWidget {
   bool _isZhLocale(BuildContext context) {
     final locale = Localizations.localeOf(context);
     return locale.languageCode == 'zh';
+  }
+
+  void _showDownloadPathDialog(BuildContext context, WidgetRef ref) {
+    final isZh = _isZhLocale(context);
+    
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              // On Android, show predefined locations instead of folder picker
+              if (Platform.isAndroid) ...[
+                ListTile(
+                  leading: const Icon(Icons.download, color: AppColors.primary),
+                  title: Text(isZh ? '下载文件夹 (Download)' : 'Download Folder'),
+                  subtitle: Text('/storage/emulated/0/Download'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    ref.read(downloadPathProvider.notifier).setDownloadPath('/storage/emulated/0/Download');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(isZh ? '下载目录已设置为 Download' : 'Download directory set to Download'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.book, color: AppColors.primary),
+                  title: Text(isZh ? '文档文件夹 (Documents)' : 'Documents Folder'),
+                  subtitle: Text('/storage/emulated/0/Documents'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    ref.read(downloadPathProvider.notifier).setDownloadPath('/storage/emulated/0/Documents');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(isZh ? '下载目录已设置为 Documents' : 'Download directory set to Documents'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  },
+                ),
+              ] else ...[
+                // On desktop platforms, use file picker
+                ListTile(
+                  leading: const Icon(Icons.folder_open, color: AppColors.primary),
+                  title: Text(isZh ? '选择文件夹' : 'Select Folder'),
+                  subtitle: Text(isZh ? '选择自定义下载目录' : 'Choose a custom download directory'),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    final result = await FilePicker.platform.getDirectoryPath();
+                    if (result != null) {
+                      ref.read(downloadPathProvider.notifier).setDownloadPath(result);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(isZh ? '下载目录已更新' : 'Download directory updated'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                ),
+              ],
+              ListTile(
+                leading: const Icon(Icons.restore, color: AppColors.textSecondary),
+                title: Text(isZh ? '恢复默认' : 'Reset to Default'),
+                subtitle: Text(isZh ? '使用应用默认文档目录' : 'Use app default documents directory'),
+                onTap: () {
+                  Navigator.pop(context);
+                  ref.read(downloadPathProvider.notifier).clearDownloadPath();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(isZh ? '已恢复默认目录' : 'Reset to default directory'),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _launchUrl(String url) async {

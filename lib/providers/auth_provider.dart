@@ -40,6 +40,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   /// Initialize - restore session from stored credentials
+  /// Now waits for API verification before setting authenticated state
   Future<void> _init() async {
     state = state.copyWith(isLoading: true);
     
@@ -47,24 +48,36 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final credentials = await _storage.getCredentials();
       final userId = credentials['userId'];
       final userKey = credentials['userKey'];
-      final email = credentials['email'];
-      final name = credentials['name'];
 
       if (userId != null && userKey != null) {
-        // Restore user from stored credentials directly
-        // No need to call API - just set the auth state
-        // API calls will use the stored userId and userKey as cookies
-        final user = User(
-          id: userId,
-          email: email ?? '',
-          name: name ?? 'User',
-          remixUserkey: userKey,
-        );
-        
-        state = AuthState(user: user);
-        
-        // Optionally refresh profile in background (non-blocking)
-        _refreshProfileInBackground();
+        // Verify stored credentials by calling API
+        try {
+          final response = await _api.getProfile();
+          final success = response['success'];
+          if (success == true || success == 1) {
+            // API verification succeeded - use actual user data
+            final userData = response['user'] as Map<String, dynamic>;
+            final user = User.fromJson(userData);
+            state = AuthState(user: user);
+          } else {
+            // API returned failure - credentials invalid, clear and require login
+            await _storage.clearCredentials();
+            state = AuthState();
+          }
+        } catch (e) {
+          // Network error - fall back to stored credentials
+          // Allow offline access with cached user info
+          final email = credentials['email'];
+          final name = credentials['name'];
+          final user = User(
+            id: userId,
+            email: email ?? '',
+            name: name ?? 'User',
+            remixUserkey: userKey,
+          );
+          state = AuthState(user: user);
+          print('Profile verification failed, using cached credentials: $e');
+        }
       } else {
         // No stored credentials, need login
         state = AuthState();
@@ -72,25 +85,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       state = AuthState(error: e.toString());
     }
-  }
-  
-  /// Refresh profile in background without blocking
-  void _refreshProfileInBackground() {
-    Future.microtask(() async {
-      try {
-        final response = await _api.getProfile();
-        final success = response['success'];
-        if (success == true || success == 1) {
-          final userData = response['user'] as Map<String, dynamic>;
-          final user = User.fromJson(userData);
-          state = AuthState(user: user);
-        }
-      } catch (e) {
-        // Keep existing state on error - user can still use app
-        // Only log the error, don't change auth state
-        print('Background profile refresh failed: $e');
-      }
-    });
   }
 
   /// Login with email and password

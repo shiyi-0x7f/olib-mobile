@@ -1,4 +1,4 @@
-package com.olib.mobile
+package com.open_library.app
 
 import io.flutter.embedding.android.FlutterActivity
 

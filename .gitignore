@@ -67,9 +67,9 @@ app.*.map.json
 *.dSYM
 
 # Publish page
-publish_page/
 api_dump/
 test/
+publish_page/
 
 # ========================================
 # SENSITIVE SOURCE CODE - DO NOT SHARE

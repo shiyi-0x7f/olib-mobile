@@ -3,7 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../models/book.dart';
 import '../theme/app_colors.dart';
 
-class BookCard extends StatelessWidget {
+class BookCard extends StatefulWidget {
   final Book book;
   final VoidCallback? onTap;
 
@@ -12,6 +12,24 @@ class BookCard extends StatelessWidget {
     required this.book,
     this.onTap,
   });
+
+  @override
+  State<BookCard> createState() => _BookCardState();
+}
+
+class _BookCardState extends State<BookCard> {
+  bool _shouldLoadImage = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Delay image loading slightly to allow layout to complete
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        setState(() => _shouldLoadImage = true);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +51,7 @@ class BookCard extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: onTap,
+            onTap: widget.onTap,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -43,15 +61,21 @@ class BookCard extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      if (book.cover != null && book.cover!.isNotEmpty)
+                      if (widget.book.cover != null && widget.book.cover!.isNotEmpty && _shouldLoadImage)
                         CachedNetworkImage(
-                          imageUrl: book.cover!,
+                          imageUrl: widget.book.cover!,
                           fit: BoxFit.cover,
+                          memCacheWidth: 300,
+                          fadeInDuration: const Duration(milliseconds: 300),
+                          fadeOutDuration: const Duration(milliseconds: 100),
+                          httpHeaders: const {
+                            'Connection': 'keep-alive',
+                          },
                           errorWidget: (context, url, error) => _buildPlaceholder(),
                           placeholder: (context, url) => _buildShimmer(),
                         )
                       else
-                        _buildPlaceholder(),
+                        _shouldLoadImage ? _buildPlaceholder() : _buildShimmer(),
                     ],
                   ),
                 ),
@@ -72,7 +96,7 @@ class BookCard extends StatelessWidget {
                         // Level 1: Title (Black, Bold, Large)
                         Expanded(
                           child: Text(
-                            book.title,
+                            widget.book.title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -83,9 +107,9 @@ class BookCard extends StatelessWidget {
                         ),
                         
                         // Level 3: Author (Grey, Secondary)
-                        if (book.author != null && book.author!.isNotEmpty)
+                        if (widget.book.author != null && widget.book.author!.isNotEmpty)
                           Text(
-                            book.author!,
+                            widget.book.author!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -111,8 +135,8 @@ class BookCard extends StatelessWidget {
   
   /// Build the top meta row (extension + year)
   Widget _buildMetaRow() {
-    final hasExtension = book.extension != null && book.extension!.isNotEmpty;
-    final hasYear = book.year != null && book.year != 0;
+    final hasExtension = widget.book.extension != null && widget.book.extension!.isNotEmpty;
+    final hasYear = widget.book.year != null && widget.book.year != 0;
     
     if (!hasExtension && !hasYear) {
       // Return a minimal spacer if no meta info available
@@ -123,7 +147,7 @@ class BookCard extends StatelessWidget {
       children: [
         if (hasExtension)
           Text(
-            book.extension!.toUpperCase(),
+            widget.book.extension!.toUpperCase(),
             style: const TextStyle(
               color: AppColors.accent,
               fontSize: 10,
@@ -135,7 +159,7 @@ class BookCard extends StatelessWidget {
           const SizedBox(width: 4),
         if (hasYear)
           Text(
-            hasExtension ? '• ${book.year}' : '${book.year}',
+            hasExtension ? '• ${widget.book.year}' : '${widget.book.year}',
             style: const TextStyle(
               color: AppColors.textSecondary,
               fontSize: 10,
@@ -147,8 +171,8 @@ class BookCard extends StatelessWidget {
   
   /// Build the bottom row (rating + filesize)
   Widget _buildBottomRow() {
-    final hasScore = book.interestScore != null && book.interestScore!.isNotEmpty;
-    final hasSize = book.filesizeString != null && book.filesizeString!.isNotEmpty;
+    final hasScore = widget.book.interestScore != null && widget.book.interestScore!.isNotEmpty;
+    final hasSize = widget.book.filesizeString != null && widget.book.filesizeString!.isNotEmpty;
     
     if (!hasScore && !hasSize) {
       // Show nothing if no data available
@@ -161,7 +185,7 @@ class BookCard extends StatelessWidget {
           const Icon(Icons.star_rounded, size: 14, color: AppColors.accent),
           const SizedBox(width: 4),
           Text(
-            book.interestScore!,
+            widget.book.interestScore!,
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
@@ -172,7 +196,7 @@ class BookCard extends StatelessWidget {
         const Spacer(),
         if (hasSize)
           Text(
-            book.filesizeString!,
+            widget.book.filesizeString!,
             style: const TextStyle(
               fontSize: 10,
               color: AppColors.textSecondary,

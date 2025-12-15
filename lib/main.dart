@@ -14,6 +14,7 @@ import 'screens/favorites/favorites_screen.dart';
 import 'screens/settings/history_screen.dart';
 import 'screens/downloads/local_downloads_screen.dart';
 import 'screens/settings/settings_screen.dart';
+import 'screens/similar/similar_books_screen.dart';
 import 'services/hive_service.dart';
 import 'services/ad_service.dart';
 import 'l10n/app_localizations.dart';
@@ -52,7 +53,7 @@ class MyApp extends ConsumerWidget {
     }
 
     return MaterialApp(
-      title: 'ZLibrary',
+      title: 'Olib',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
@@ -80,6 +81,7 @@ class MyApp extends ConsumerWidget {
         AppRoutes.history: (context) => const HistoryScreen(),
         AppRoutes.downloads: (context) => const LocalDownloadsScreen(),
         AppRoutes.settings: (context) => const SettingsScreen(),
+        AppRoutes.similarBooks: (context) => const SimilarBooksScreen(),
       },
     );
   }

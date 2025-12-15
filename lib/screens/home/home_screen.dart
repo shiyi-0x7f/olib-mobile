@@ -362,7 +362,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
 
         const SliverPadding(padding: EdgeInsets.only(bottom: 16)),
 
-        _buildBookGrid(ref.watch(mostPopularBooksProvider)),
+        _buildBookGrid(ref.watch(recommendedBooksProvider)),
 
         const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
       ],

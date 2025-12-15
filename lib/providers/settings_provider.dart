@@ -47,10 +47,34 @@ final themeModeProvider =
   return ThemeModeNotifier(StorageService());
 });
 
+/// Download path notifier for custom download directory (Android only)
+class DownloadPathNotifier extends StateNotifier<String?> {
+  final StorageService _storage;
+  
+  DownloadPathNotifier(this._storage) : super(null) {
+    _init();
+  }
+  
+  Future<void> _init() async {
+    state = await _storage.getDownloadPath();
+  }
+  
+  Future<void> setDownloadPath(String path) async {
+    await _storage.setDownloadPath(path);
+    state = path;
+  }
+  
+  Future<void> clearDownloadPath() async {
+    // Clear by setting empty string, storage will handle deletion
+    await _storage.setDownloadPath('');
+    state = null;
+  }
+}
+
 /// Download path provider
-final downloadPathProvider = FutureProvider<String?>((ref) async {
-  final storage = StorageService();
-  return await storage.getDownloadPath();
+final downloadPathProvider = 
+    StateNotifierProvider<DownloadPathNotifier, String?>((ref) {
+  return DownloadPathNotifier(StorageService());
 });
 
 /// Locale notifier for managing app language

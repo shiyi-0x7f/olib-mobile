@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/book.dart';
 import '../services/zlibrary_api.dart';
+import '../services/storage_service.dart';
 import 'zlibrary_provider.dart';
 
 enum DownloadStatus { pending, downloading, completed, error }
@@ -46,9 +47,67 @@ class DownloadTask {
 
 class DownloadNotifier extends StateNotifier<List<DownloadTask>> {
   final ZLibraryApi _api;
+  final StorageService _storage = StorageService();
   final Map<String, CancelToken> _cancelTokens = {};
 
   DownloadNotifier(this._api) : super([]);
+
+  /// Check if file already exists for a book
+  /// Returns the file path if exists, null otherwise
+  Future<String?> checkFileExists(Book book) async {
+    // First check download history
+    final historyPath = await _storage.getDownloadedFilePath(book.id.toString());
+    if (historyPath != null) {
+      final file = File(historyPath);
+      if (await file.exists()) {
+        return historyPath;
+      }
+    }
+
+    // Also check if file exists in download directory (may have been downloaded elsewhere)
+    final savePath = await _buildSavePath(book);
+    if (savePath != null) {
+      final file = File(savePath);
+      if (await file.exists()) {
+        return savePath;
+      }
+    }
+
+    return null;
+  }
+
+  /// Build save path for a book
+  Future<String?> _buildSavePath(Book book) async {
+    try {
+      String baseDir;
+      final customPath = await _storage.getDownloadPath();
+      
+      if (customPath != null && customPath.isNotEmpty && !Platform.isIOS) {
+        baseDir = customPath;
+      } else {
+        final appDocDir = await getApplicationDocumentsDirectory();
+        baseDir = appDocDir.path;
+      }
+      
+      String safeTitle = book.title.replaceAll(RegExp(r'[/\\:*?"<>|\x00-\x1f]'), '').trim();
+      
+      if (safeTitle.isEmpty) {
+        safeTitle = 'book_${book.id}';
+        if (book.author != null && book.author!.isNotEmpty) {
+          final safeAuthor = book.author!.replaceAll(RegExp(r'[/\\:*?"<>|\x00-\x1f]'), '').trim();
+          if (safeAuthor.isNotEmpty) {
+            safeTitle = '$safeAuthor - $safeTitle';
+          }
+        }
+      }
+      
+      final ext = book.extension ?? 'epub';
+      final fileName = '$safeTitle.$ext';
+      return '$baseDir/$fileName';
+    } catch (e) {
+      return null;
+    }
+  }
 
   /// Start a download
   Future<void> startDownload(Book book) async {
@@ -63,7 +122,23 @@ class DownloadNotifier extends StateNotifier<List<DownloadTask>> {
     _updateOrAddTask(DownloadTask(id: id, book: book, status: DownloadStatus.pending));
 
     try {
-      final appDocDir = await getApplicationDocumentsDirectory();
+      // Determine download directory
+      String baseDir;
+      final customPath = await _storage.getDownloadPath();
+      
+      // Use custom path on Android, Linux, Windows, macOS (not iOS due to sandbox restrictions)
+      if (customPath != null && customPath.isNotEmpty && !Platform.isIOS) {
+        baseDir = customPath;
+        // Ensure directory exists
+        final dir = Directory(baseDir);
+        if (!await dir.exists()) {
+          await dir.create(recursive: true);
+        }
+      } else {
+        final appDocDir = await getApplicationDocumentsDirectory();
+        baseDir = appDocDir.path;
+      }
+      
       // Use clean filename - only remove characters that are problematic for file systems
       // Preserve non-ASCII characters (Chinese, Japanese, Korean, etc.)
       // Remove: / \ : * ? " < > | and control characters
@@ -82,7 +157,7 @@ class DownloadNotifier extends StateNotifier<List<DownloadTask>> {
       
       final ext = book.extension ?? 'epub';
       final fileName = '$safeTitle.$ext';
-      final savePath = '${appDocDir.path}/$fileName';
+      final savePath = '$baseDir/$fileName';
 
       // Update to downloading
       _updateTask(id, (t) => t.copyWith(status: DownloadStatus.downloading, progress: 0.0));
@@ -103,11 +178,7 @@ class DownloadNotifier extends StateNotifier<List<DownloadTask>> {
           }
         },
         cancelToken: cancelToken,
-      ); // Note: Need to update API to accept cancelToken if not already supported? 
-         // API wrapper currently doesn't pass cancelToken to dio.download. 
-         // I'll assume for now I cannot cancel efficiently without updating API, 
-         // but I will add it to the API method later or now. 
-         // For now, let's proceed.
+      );
 
       // Complete
       _updateTask(id, (t) => t.copyWith(
@@ -115,6 +186,14 @@ class DownloadNotifier extends StateNotifier<List<DownloadTask>> {
         progress: 1.0,
         filePath: savePath,
       ));
+      
+      // Save to download history
+      await _storage.addToDownloadHistory(
+        book.id.toString(),
+        book.title,
+        book.author,
+        savePath,
+      );
       
       _cancelTokens.remove(id);
 

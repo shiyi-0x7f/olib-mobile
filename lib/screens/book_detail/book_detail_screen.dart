@@ -10,6 +10,8 @@ import '../../providers/download_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/update_service.dart';
+import '../../routes/app_routes.dart';
+import '../similar/similar_books_screen.dart';
 
 class BookDetailScreen extends ConsumerWidget {
   const BookDetailScreen({super.key});
@@ -99,7 +101,7 @@ class BookDetailScreen extends ConsumerWidget {
                         child: ElevatedButton.icon(
                           onPressed: isDownloading
                               ? null
-                              : () {
+                              : () async {
                                   // Check if app is blocked due to force update
                                   if (UpdateService.isBlocked && !isCompleted) {
                                     final locale = Localizations.localeOf(context).languageCode;
@@ -130,6 +132,44 @@ class BookDetailScreen extends ConsumerWidget {
                                   if (isCompleted && downloadTask?.filePath != null) {
                                     OpenFilex.open(downloadTask!.filePath!);
                                   } else {
+                                    // Check if file already exists
+                                    final existingPath = await ref
+                                        .read(downloadProvider.notifier)
+                                        .checkFileExists(book);
+                                    
+                                    if (existingPath != null && context.mounted) {
+                                      final locale = Localizations.localeOf(context).languageCode;
+                                      final isZh = locale == 'zh';
+                                      
+                                      // Show dialog to warn user
+                                      AwesomeDialog(
+                                        context: context,
+                                        dialogType: DialogType.info,
+                                        animType: AnimType.bottomSlide,
+                                        title: isZh ? '文件已存在' : 'File Already Exists',
+                                        desc: isZh 
+                                            ? '这本书已经下载过了。\n\n您可以打开现有文件或重新下载。'
+                                            : 'This book has already been downloaded.\n\nYou can open the existing file or download again.',
+                                        btnCancelText: isZh ? '打开文件' : 'Open File',
+                                        btnCancelColor: Colors.green,
+                                        btnCancelOnPress: () {
+                                          OpenFilex.open(existingPath);
+                                        },
+                                        btnOkText: isZh ? '重新下载' : 'Download Again',
+                                        btnOkColor: AppColors.primary,
+                                        btnOkOnPress: () {
+                                          ref
+                                              .read(downloadProvider.notifier)
+                                              .startDownload(book);
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                                content: Text(AppLocalizations.of(context).get('downloading'))),
+                                          );
+                                        },
+                                      ).show();
+                                      return;
+                                    }
+                                    
                                     ref
                                         .read(downloadProvider.notifier)
                                         .startDownload(book);
@@ -178,6 +218,32 @@ class BookDetailScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
+                  
+                  // Similar Books Button
+                  if (book.hash != null && book.hash!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).pushNamed(
+                            AppRoutes.similarBooks,
+                            arguments: SimilarBooksArgs(
+                              bookId: book.id,
+                              hashId: book.hash!,
+                              bookTitle: book.title,
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.auto_awesome),
+                        label: Text(AppLocalizations.of(context).get('similar_books')),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(color: AppColors.primary),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

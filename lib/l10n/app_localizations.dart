@@ -15,7 +15,7 @@ class AppLocalizations {
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
       // General
-      'app_name': 'ZLibrary',
+      'app_name': 'Olib',
       'cancel': 'Cancel',
       'save': 'Save',
       'close': 'Close',
@@ -141,11 +141,17 @@ class AppLocalizations {
       // View Mode
       'list_view': 'List view',
       'grid_view': 'Grid view',
+      
+      // Similar Books
+      'similar_books': 'Similar Books',
+      'loading_similar_books': 'Loading similar books...',
+      'no_similar_books': 'No similar books found',
+      'no_similar_books_message': 'We could not find any similar books for this title',
     },
     
     'zh': {
       // General
-      'app_name': 'ZLibrary',
+      'app_name': 'Olib',
       'cancel': '取消',
       'save': '保存',
       'close': '关闭',
@@ -256,7 +262,7 @@ class AppLocalizations {
       'about': '关于',
       'version': '版本',
       'downloads_left_today': '今日剩余下载次数',
-      'about_zlibrary': '关于 ZLibrary',
+      'about_zlibrary': '关于 Olib',
       
       // Network
       'select_network': '选择线路',
@@ -271,11 +277,17 @@ class AppLocalizations {
       // View Mode
       'list_view': '列表视图',
       'grid_view': '网格视图',
+      
+      // Similar Books
+      'similar_books': '相似书籍',
+      'loading_similar_books': '正在加载相似书籍...',
+      'no_similar_books': '未找到相似书籍',
+      'no_similar_books_message': '我们没有找到相关的相似书籍推荐',
     },
     
     'zh_TW': {
       // General
-      'app_name': 'ZLibrary',
+      'app_name': 'Olib',
       'cancel': '取消',
       'save': '儲存',
       'close': '關閉',
@@ -357,7 +369,7 @@ class AppLocalizations {
     
     'fr': {
       // General
-      'app_name': 'ZLibrary',
+      'app_name': 'Olib',
       'cancel': 'Annuler',
       'save': 'Enregistrer',
       'close': 'Fermer',
@@ -438,7 +450,7 @@ class AppLocalizations {
     },
     
     'es': {
-      'app_name': 'ZLibrary',
+      'app_name': 'Olib',
       'cancel': 'Cancelar',
       'save': 'Guardar',
       'close': 'Cerrar',
@@ -531,14 +543,14 @@ class AppLocalizations {
       'about': 'Acerca de',
       'version': 'Versión',
       'downloads_left_today': 'descargas restantes hoy',
-      'about_zlibrary': 'Acerca de ZLibrary',
+      'about_zlibrary': 'Acerca de Olib',
       'select_network': 'Seleccionar red',
       'custom_domain': 'Dominio personalizado',
       'recheck': 'Verificar de nuevo',
     },
     
     'de': {
-      'app_name': 'ZLibrary',
+      'app_name': 'Olib',
       'cancel': 'Abbrechen',
       'save': 'Speichern',
       'close': 'Schließen',
@@ -631,14 +643,14 @@ class AppLocalizations {
       'about': 'Über',
       'version': 'Version',
       'downloads_left_today': 'Downloads heute verfügbar',
-      'about_zlibrary': 'Über ZLibrary',
+      'about_zlibrary': 'Über Olib',
       'select_network': 'Netzwerk wählen',
       'custom_domain': 'Benutzerdefinierte Domain',
       'recheck': 'Erneut prüfen',
     },
     
     'pt': {
-      'app_name': 'ZLibrary',
+      'app_name': 'Olib',
       'cancel': 'Cancelar',
       'save': 'Salvar',
       'close': 'Fechar',
@@ -731,14 +743,14 @@ class AppLocalizations {
       'about': 'Sobre',
       'version': 'Versão',
       'downloads_left_today': 'downloads restantes hoje',
-      'about_zlibrary': 'Sobre ZLibrary',
+      'about_zlibrary': 'Sobre Olib',
       'select_network': 'Selecionar rede',
       'custom_domain': 'Domínio personalizado',
       'recheck': 'Verificar novamente',
     },
     
     'ru': {
-      'app_name': 'ZLibrary',
+      'app_name': 'Olib',
       'cancel': 'Отмена',
       'save': 'Сохранить',
       'close': 'Закрыть',
@@ -831,14 +843,14 @@ class AppLocalizations {
       'about': 'О приложении',
       'version': 'Версия',
       'downloads_left_today': 'загрузок осталось сегодня',
-      'about_zlibrary': 'О ZLibrary',
+      'about_zlibrary': 'О Olib',
       'select_network': 'Выбрать сеть',
       'custom_domain': 'Свой домен',
       'recheck': 'Проверить снова',
     },
     
     'ja': {
-      'app_name': 'ZLibrary',
+      'app_name': 'Olib',
       'cancel': 'キャンセル',
       'save': '保存',
       'close': '閉じる',
@@ -931,14 +943,14 @@ class AppLocalizations {
       'about': 'について',
       'version': 'バージョン',
       'downloads_left_today': '本日の残りダウンロード数',
-      'about_zlibrary': 'ZLibraryについて',
+      'about_zlibrary': 'Olibについて',
       'select_network': 'ネットワークを選択',
       'custom_domain': 'カスタムドメイン',
       'recheck': '再確認',
     },
     
     'ko': {
-      'app_name': 'ZLibrary',
+      'app_name': 'Olib',
       'cancel': '취소',
       'save': '저장',
       'close': '닫기',
@@ -1031,14 +1043,14 @@ class AppLocalizations {
       'about': '정보',
       'version': '버전',
       'downloads_left_today': '오늘 남은 다운로드',
-      'about_zlibrary': 'ZLibrary 정보',
+      'about_zlibrary': 'Olib 정보',
       'select_network': '네트워크 선택',
       'custom_domain': '사용자 정의 도메인',
       'recheck': '다시 확인',
     },
     
     'it': {
-      'app_name': 'ZLibrary',
+      'app_name': 'Olib',
       'cancel': 'Annulla',
       'save': 'Salva',
       'close': 'Chiudi',

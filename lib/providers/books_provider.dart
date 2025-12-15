@@ -135,6 +135,21 @@ final mostPopularBooksProvider = FutureProvider<List<Book>>((ref) async {
   return [];
 });
 
+/// User recommended books provider (for Trending section)
+final recommendedBooksProvider = FutureProvider<List<Book>>((ref) async {
+  final api = ref.watch(zlibraryApiProvider);
+  
+  final response = await api.getUserRecommended();
+
+  final success = response['success'];
+  if ((success == true || success == 1) && response.containsKey('books')) {
+    final booksData = response['books'] as List<dynamic>;
+    return booksData.map((json) => Book.fromJson(json)).toList();
+  }
+  
+  return [];
+});
+
 /// Recently added books provider
 final recentBooksProvider = FutureProvider<List<Book>>((ref) async {
   final api = ref.watch(zlibraryApiProvider);

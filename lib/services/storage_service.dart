@@ -1,10 +1,12 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class StorageService {
   static const String _keyFavorites = 'favorite_books';
   static const String _keyDownloads = 'downloaded_books';
   static const String _keyThemeMode = 'theme_mode';
   static const String _keyDownloadPath = 'download_path';
+  static const String _keyDownloadHistory = 'download_history';
 
   /// Save favorite book IDs
   Future<void> saveFavorites(List<String> bookIds) async {
@@ -74,5 +76,57 @@ class StorageService {
   Future<void> setDownloadPath(String path) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyDownloadPath, path);
+  }
+
+  // ===== Download History Methods =====
+  
+  /// Add book to download history
+  /// Stores: {bookId: {title, author, filePath, downloadTime}}
+  Future<void> addToDownloadHistory(String bookId, String title, String? author, String filePath) async {
+    final prefs = await SharedPreferences.getInstance();
+    final historyJson = prefs.getString(_keyDownloadHistory) ?? '{}';
+    final history = Map<String, dynamic>.from(jsonDecode(historyJson));
+    
+    history[bookId] = {
+      'title': title,
+      'author': author,
+      'filePath': filePath,
+      'downloadTime': DateTime.now().toIso8601String(),
+    };
+    
+    await prefs.setString(_keyDownloadHistory, jsonEncode(history));
+  }
+
+  /// Get all download history
+  Future<Map<String, dynamic>> getDownloadHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final historyJson = prefs.getString(_keyDownloadHistory) ?? '{}';
+    return Map<String, dynamic>.from(jsonDecode(historyJson));
+  }
+
+  /// Check if book was previously downloaded
+  Future<bool> isBookDownloaded(String bookId) async {
+    final history = await getDownloadHistory();
+    return history.containsKey(bookId);
+  }
+
+  /// Get downloaded file path for a book
+  Future<String?> getDownloadedFilePath(String bookId) async {
+    final history = await getDownloadHistory();
+    if (history.containsKey(bookId)) {
+      return history[bookId]['filePath'] as String?;
+    }
+    return null;
+  }
+
+  /// Remove book from download history
+  Future<void> removeFromDownloadHistory(String bookId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final historyJson = prefs.getString(_keyDownloadHistory) ?? '{}';
+    final history = Map<String, dynamic>.from(jsonDecode(historyJson));
+    
+    history.remove(bookId);
+    
+    await prefs.setString(_keyDownloadHistory, jsonEncode(history));
   }
 }
