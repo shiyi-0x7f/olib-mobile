@@ -367,13 +367,13 @@ class SettingsScreen extends ConsumerWidget {
                   leading: const Icon(Icons.book_outlined),
                   title: Text(AppLocalizations.of(context).get('about_zlibrary')),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _showAboutZLibrary(context),
+                  onTap: () => _showAboutApp(context),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.language),
-                  title: Text(_isZhLocale(context) ? '访问官网' : 'Visit Website'),
+                  leading: const Icon(Icons.code),
+                  title: Text(_isZhLocale(context) ? 'GitHub 开源' : 'GitHub Open Source'),
                   trailing: const Icon(Icons.open_in_new, size: 18),
-                  onTap: () => _launchUrl('https://z-library.sk'),
+                  onTap: () => _launchUrl('https://github.com/shiyi-0x7f/olib-mobile'),
                 ),
               ],
             ),
@@ -571,12 +571,12 @@ class SettingsScreen extends ConsumerWidget {
   void _shareApp(BuildContext context) {
     final isZh = _isZhLocale(context);
     final text = isZh
-        ? '推荐一个免费电子书应用 FreeBooks，海量图书免费下载！\n下载地址: https://bookbook.space'
-        : 'Check out FreeBooks - a free ebook app with millions of books!\nDownload: https://bookbook.space';
+        ? '推荐一款开源电子书阅读器 Olib，由AI构建的第三方客户端！\n下载地址: https://bookbook.space\nGitHub: https://github.com/shiyi-0x7f/olib-mobile'
+        : 'Check out Olib - an open-source ebook reader built with AI!\nDownload: https://bookbook.space\nGitHub: https://github.com/shiyi-0x7f/olib-mobile';
     Share.share(text);
   }
 
-  void _showAboutZLibrary(BuildContext context) {
+  void _showAboutApp(BuildContext context) {
     final isZh = _isZhLocale(context);
     
     showDialog(
@@ -595,7 +595,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              'Z-Library',
+              'Olib',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
@@ -610,8 +610,8 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               Text(
                 isZh 
-                    ? '全球最大的免费电子书图书馆'
-                    : "The world's largest free ebook library",
+                    ? '🤖 AI构建的开源第三方客户端'
+                    : '🤖 AI-Built Open Source Third-Party Client',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -620,8 +620,8 @@ class SettingsScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(
                 isZh
-                    ? 'Z-Library 致力于让知识无障碍传播。我们相信，每个人都应该能够免费获取书籍和学术资源，无论他们身处何地。\n\n我们的使命是：\n• 消除知识获取的障碍\n• 支持全球教育和研究\n• 保存和分享人类知识遗产\n\n加入我们，共同构建一个更加开放的知识世界。'
-                    : 'Z-Library is dedicated to making knowledge accessible to everyone. We believe that everyone should have free access to books and academic resources, regardless of where they are.\n\nOur mission is to:\n• Remove barriers to knowledge access\n• Support global education and research\n• Preserve and share humanity\'s intellectual heritage\n\nJoin us in building a more open world of knowledge.',
+                    ? 'Olib 是一个由AI辅助构建的开源项目。\n\n📱 本项目仅提供前端界面\n📚 所有书籍数据来源于外部图书馆服务\n🔓 100% 开源，代码公开透明\n\n⚠️ 声明：\n• Olib 是第三方客户端，非官方客户端\n• 与任何官方服务无关联\n• 使用本应用即表示您理解并接受以上内容'
+                    : 'Olib is an open-source project built with AI assistance.\n\n📱 This project only provides frontend interface\n📚 All book data comes from external library services\n🔓 100% open source, transparent code\n\n⚠️ Disclaimer:\n• Olib is a third-party client, not an official client\n• Not affiliated with any official service\n• By using this app you understand and accept the above',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[700],
@@ -637,13 +637,13 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.format_quote, color: AppColors.primary, size: 20),
+                    Icon(Icons.star, color: AppColors.primary, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         isZh 
-                            ? '"知识属于全人类"'
-                            : '"Knowledge belongs to humanity"',
+                            ? '"知识无边界"'
+                            : '"Knowledge has no boundaries"',
                         style: TextStyle(
                           fontStyle: FontStyle.italic,
                           color: Colors.grey[800],
@@ -664,10 +664,10 @@ class SettingsScreen extends ConsumerWidget {
           ElevatedButton.icon(
             onPressed: () {
               Navigator.pop(context);
-              _launchUrl('https://z-library.sk');
+              _launchUrl('https://github.com/shiyi-0x7f/olib-mobile');
             },
-            icon: const Icon(Icons.open_in_new, size: 16),
-            label: Text(isZh ? '访问官网' : 'Visit Website'),
+            icon: const Icon(Icons.code, size: 16),
+            label: Text(isZh ? '查看源码' : 'View Source'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,

@@ -64,8 +64,22 @@ class DownloadNotifier extends StateNotifier<List<DownloadTask>> {
 
     try {
       final appDocDir = await getApplicationDocumentsDirectory();
-      // Use clean filename
-      final safeTitle = book.title.replaceAll(RegExp(r'[^\w\s\.-]'), '');
+      // Use clean filename - only remove characters that are problematic for file systems
+      // Preserve non-ASCII characters (Chinese, Japanese, Korean, etc.)
+      // Remove: / \ : * ? " < > | and control characters
+      String safeTitle = book.title.replaceAll(RegExp(r'[/\\:*?"<>|\x00-\x1f]'), '').trim();
+      
+      // Fallback if title becomes empty (e.g., only contained special characters)
+      if (safeTitle.isEmpty) {
+        safeTitle = 'book_${book.id}';
+        if (book.author != null && book.author!.isNotEmpty) {
+          final safeAuthor = book.author!.replaceAll(RegExp(r'[/\\:*?"<>|\x00-\x1f]'), '').trim();
+          if (safeAuthor.isNotEmpty) {
+            safeTitle = '$safeAuthor - $safeTitle';
+          }
+        }
+      }
+      
       final ext = book.extension ?? 'epub';
       final fileName = '$safeTitle.$ext';
       final savePath = '${appDocDir.path}/$fileName';

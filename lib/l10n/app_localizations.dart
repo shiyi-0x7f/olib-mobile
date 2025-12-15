@@ -126,12 +126,21 @@ class AppLocalizations {
       'about': 'About',
       'version': 'Version',
       'downloads_left_today': 'downloads left today',
-      'about_zlibrary': 'About ZLibrary',
+      'about_zlibrary': 'About Olib',
       
       // Network
       'select_network': 'Select Network',
       'custom_domain': 'Custom Domain',
       'recheck': 'Re-check',
+      
+      // History Screen
+      'no_history': 'No history',
+      'history_empty_message': 'Books you downloaded on other devices will appear here',
+      'loading_downloads': 'Loading downloads...',
+      
+      // View Mode
+      'list_view': 'List view',
+      'grid_view': 'Grid view',
     },
     
     'zh': {
@@ -253,6 +262,15 @@ class AppLocalizations {
       'select_network': '选择线路',
       'custom_domain': '自定义域名',
       'recheck': '重新检测',
+      
+      // History Screen
+      'no_history': '暂无历史记录',
+      'history_empty_message': '在其他设备上下载的书籍将显示在这里',
+      'loading_downloads': '加载中...',
+      
+      // View Mode
+      'list_view': '列表视图',
+      'grid_view': '网格视图',
     },
     
     'zh_TW': {

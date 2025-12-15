@@ -1,4 +1,4 @@
-package com.freebooks.app
+package com.olib.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

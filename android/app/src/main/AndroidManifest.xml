@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application
-        android:label="FreeBooks"
+        android:label="Olib"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

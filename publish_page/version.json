@@ -1,0 +1,10 @@
+{
+    "version": "1.0.0",
+    "build": 1,
+    "url": "https://zlib-mobile.netlify.app/",
+    "changelog": {
+        "en": "🚀 v1.0.0 just dropped harder than my grades in college. This app is certified 'it just works' (Bethesda please don't sue). Warning: May cause excessive reading and forgetting to touch grass. Not financial advice. 💀",
+        "zh": "🚀 v1.0.0 上线！下载就送三年高考五年模拟电子版（骗你的）。家人们谁懂啊，我写了一坤时的代码。🏀"
+    },
+    "force_update": true
+}

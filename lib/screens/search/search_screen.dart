@@ -7,6 +7,7 @@ import '../../providers/books_provider.dart';
 import '../../providers/zlibrary_provider.dart';
 import '../../models/book.dart';
 import '../../widgets/book_card.dart';
+import '../../widgets/book_list_tile.dart';
 import '../../widgets/loading_widget.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/gradient_app_bar.dart';
@@ -40,6 +41,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   int _totalPages = 1;
   bool _isLoadingMore = false;
   bool _hasSearched = false;
+  bool _isListView = false;
 
   @override
   void initState() {
@@ -256,7 +258,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           )
                         : Column(
                             children: [
-                              // Pagination info
+                              // Pagination info and view toggle
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                 child: Row(
@@ -269,52 +271,99 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                         fontSize: 13,
                                       ),
                                     ),
-                                    Text(
-                                      ' $_currentPage / $_totalPages${l10n.get('page')}',
-                                      style: TextStyle(
-                                        color: AppColors.textSecondary,
-                                        fontSize: 13,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          ' $_currentPage / $_totalPages${l10n.get('page')}',
+                                          style: TextStyle(
+                                            color: AppColors.textSecondary,
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        // View mode toggle button
+                                        IconButton(
+                                          icon: Icon(
+                                            _isListView ? Icons.grid_view_rounded : Icons.view_list_rounded,
+                                            color: AppColors.primary,
+                                            size: 22,
+                                          ),
+                                          tooltip: _isListView ? l10n.get('grid_view') : l10n.get('list_view'),
+                                          onPressed: () {
+                                            setState(() {
+                                              _isListView = !_isListView;
+                                            });
+                                          },
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ),
-                              // Results grid
+                              // Results - Grid or List view
                               Expanded(
-                                child: GridView.builder(
-                                  controller: _scrollController,
-                                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                                  gridDelegate:
-                                      const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    childAspectRatio: 0.65,
-                                    crossAxisSpacing: 12,
-                                    mainAxisSpacing: 12,
-                                  ),
-                                  itemCount: _allBooks.length + (_isLoadingMore ? 1 : 0),
-                                  itemBuilder: (context, index) {
-                                    // Loading indicator at the end
-                                    if (index >= _allBooks.length) {
-                                      return const Center(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(16),
-                                          child: CircularProgressIndicator(),
+                                child: _isListView
+                                    ? ListView.builder(
+                                        controller: _scrollController,
+                                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                        itemCount: _allBooks.length + (_isLoadingMore ? 1 : 0),
+                                        itemBuilder: (context, index) {
+                                          if (index >= _allBooks.length) {
+                                            return const Center(
+                                              child: Padding(
+                                                padding: EdgeInsets.all(16),
+                                                child: CircularProgressIndicator(),
+                                              ),
+                                            );
+                                          }
+                                          final book = _allBooks[index];
+                                          return BookListTile(
+                                            book: book,
+                                            onTap: () {
+                                              Navigator.of(context).pushNamed(
+                                                AppRoutes.bookDetail,
+                                                arguments: book,
+                                              );
+                                            },
+                                          );
+                                        },
+                                      )
+                                    : GridView.builder(
+                                        controller: _scrollController,
+                                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                        gridDelegate:
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          childAspectRatio: 0.65,
+                                          crossAxisSpacing: 12,
+                                          mainAxisSpacing: 12,
                                         ),
-                                      );
-                                    }
-                                    
-                                    final book = _allBooks[index];
-                                    return BookCard(
-                                      book: book,
-                                      onTap: () {
-                                        Navigator.of(context).pushNamed(
-                                          AppRoutes.bookDetail,
-                                          arguments: book,
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
+                                        itemCount: _allBooks.length + (_isLoadingMore ? 1 : 0),
+                                        itemBuilder: (context, index) {
+                                          // Loading indicator at the end
+                                          if (index >= _allBooks.length) {
+                                            return const Center(
+                                              child: Padding(
+                                                padding: EdgeInsets.all(16),
+                                                child: CircularProgressIndicator(),
+                                              ),
+                                            );
+                                          }
+                                          
+                                          final book = _allBooks[index];
+                                          return BookCard(
+                                            book: book,
+                                            onTap: () {
+                                              Navigator.of(context).pushNamed(
+                                                AppRoutes.bookDetail,
+                                                arguments: book,
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
                               ),
                             ],
                           ),

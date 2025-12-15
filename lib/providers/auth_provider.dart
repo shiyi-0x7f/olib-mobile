@@ -39,7 +39,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     _init();
   }
 
-  /// Initialize - check for stored credentials
+  /// Initialize - restore session from stored credentials
   Future<void> _init() async {
     state = state.copyWith(isLoading: true);
     
@@ -48,28 +48,49 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final userId = credentials['userId'];
       final userKey = credentials['userKey'];
       final email = credentials['email'];
-      final password = credentials['password'];
+      final name = credentials['name'];
 
       if (userId != null && userKey != null) {
-        // Attempt search to verify token validity
-        // Or just trust it and let subsequent calls fail? 
-        // User asked for "check if exists... use cache".
-        // Robust way: loginWithToken.
-        final success = await loginWithToken(userId, userKey);
+        // Restore user from stored credentials directly
+        // No need to call API - just set the auth state
+        // API calls will use the stored userId and userKey as cookies
+        final user = User(
+          id: userId,
+          email: email ?? '',
+          name: name ?? 'User',
+          remixUserkey: userKey,
+        );
         
-        if (!success && email != null && password != null) {
-          // If token failed but we have password (maybe token expired), try password login
-          await login(email, password);
-        }
-      } else if (email != null && password != null) {
-        // No token but have password
-        await login(email, password);
+        state = AuthState(user: user);
+        
+        // Optionally refresh profile in background (non-blocking)
+        _refreshProfileInBackground();
       } else {
+        // No stored credentials, need login
         state = AuthState();
       }
     } catch (e) {
       state = AuthState(error: e.toString());
     }
+  }
+  
+  /// Refresh profile in background without blocking
+  void _refreshProfileInBackground() {
+    Future.microtask(() async {
+      try {
+        final response = await _api.getProfile();
+        final success = response['success'];
+        if (success == true || success == 1) {
+          final userData = response['user'] as Map<String, dynamic>;
+          final user = User.fromJson(userData);
+          state = AuthState(user: user);
+        }
+      } catch (e) {
+        // Keep existing state on error - user can still use app
+        // Only log the error, don't change auth state
+        print('Background profile refresh failed: $e');
+      }
+    });
   }
 
   /// Login with email and password

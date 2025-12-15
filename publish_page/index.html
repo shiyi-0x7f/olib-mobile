@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Library Reader - AI-Powered Open Source Project</title>
+    <meta name="description"
+        content="An open-source library client built with AI assistance. Access ebook resources conveniently on mobile.">
+    <meta name="keywords" content="ebook, open source, library, mobile app, android, ios, reader, AI">
+    <meta name="author" content="Open Source Community">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:title" content="Open Library Reader - AI-Powered Open Source">
+    <meta property="og:description" content="An open-source library client built with AI assistance.">
+    <meta property="og:image" content="icon.png">
+    <meta property="og:type" content="website">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-brand">
+            <img src="icon.png" alt="Open Library" class="nav-logo">
+            <span>📖 Open Library</span>
+        </div>
+        <div class="nav-links">
+            <a href="#features" data-i18n="nav_features">Features</a>
+            <a href="#download" data-i18n="nav_download">Download</a>
+
+            <!-- Language Selector -->
+            <div class="lang-selector">
+                <button id="lang-btn" onclick="toggleLanguageMenu()">English</button>
+                <div id="lang-menu" class="lang-menu">
+                    <button onclick="setLanguage('en')">English</button>
+                    <button onclick="setLanguage('zh')">简体中文</button>
+                    <button onclick="setLanguage('ja')">日本語</button>
+                    <button onclick="setLanguage('ko')">한국어</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <div class="hero-badge">
+                    <span>🤖</span> <span data-i18n="disclaimer_badge">AI-Built Open Source Project</span>
+                </div>
+                <h1>
+                    <span class="gradient-text" data-i18n="hero_title_1">Knowledge</span><br>
+                    <span data-i18n="hero_title_2">Should Be Free</span>
+                </h1>
+                <p class="hero-subtitle" data-i18n="hero_subtitle">
+                    Olib is a third-party client. This project only provides the frontend interface. All book data comes
+                    from the world's largest free library.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#download" class="btn btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        <span data-i18n="btn_download">Download App</span>
+                    </a>
+                    <a href="https://github.com/shiyi-0x7f/olib-mobile" target="_blank" class="btn btn-secondary">
+                        <span>⭐ GitHub</span>
+                    </a>
+                </div>
+
+                <!-- Disclaimer -->
+                <div class="disclaimer-box">
+                    <p data-i18n="disclaimer_text">🌟 This is an open-source project built entirely with AI assistance.
+                        Olib is a third-party client, not an official client. All data comes from external sources.</p>
+                </div>
+
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">15,000,000+</span>
+                        <span class="stat-label" data-i18n="stat_books">Books</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">100,000,000+</span>
+                        <span class="stat-label" data-i18n="stat_users">Users Worldwide</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">100+</span>
+                        <span class="stat-label" data-i18n="stat_languages">Languages</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" data-i18n="stat_free">Free</span>
+                        <span class="stat-label" data-i18n="stat_forever">Forever</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trusted By Section -->
+    <section class="trusted">
+        <div class="container">
+            <p class="trusted-label">Trusted by readers in 200+ countries</p>
+            <div class="trusted-logos">
+                <span>🇺🇸 USA</span>
+                <span>🇬🇧 UK</span>
+                <span>🇨🇳 China</span>
+                <span>🇯🇵 Japan</span>
+                <span>🇰🇷 Korea</span>
+                <span>🇩🇪 Germany</span>
+                <span>🇫🇷 France</span>
+                <span>🇧🇷 Brazil</span>
+                <span>🇮🇳 India</span>
+                <span>🇷🇺 Russia</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Phone Mockup Section -->
+    <section class="phone-section">
+        <div class="phone-mockup">
+            <div class="phone-screen">
+                <div class="app-preview">
+                    <div class="app-header">
+                        <span class="greeting" data-i18n="greeting">Good Morning,</span>
+                        <span class="username" data-i18n="username">Book Lover</span>
+                    </div>
+                    <div class="search-bar">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.35-4.35" />
+                        </svg>
+                        <span data-i18n="search_placeholder">Search for books...</span>
+                    </div>
+                    <div class="book-grid">
+                        <div class="book-card"></div>
+                        <div class="book-card"></div>
+                        <div class="book-card"></div>
+                        <div class="book-card"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title animate-on-scroll">
+                <span data-i18n="features_title">Why Choose</span>
+                <span class="gradient-text" data-i18n="features_title_brand">This App</span>?
+            </h2>
+            <p class="section-subtitle animate-on-scroll" data-i18n="features_subtitle">Everything you need for your
+                reading journey</p>
+
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.35-4.35" />
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feature_search_title">Powerful Search</h3>
+                    <p data-i18n="feature_search_desc">Find any book instantly with advanced filters for language,
+                        format, and year.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feature_offline_title">Offline Reading</h3>
+                    <p data-i18n="feature_offline_desc">Download books in EPUB, PDF, MOBI and more. Read anytime,
+                        anywhere.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feature_favorites_title">Save Favorites</h3>
+                    <p data-i18n="feature_favorites_desc">Build your personal library by saving books for later reading.
+                    </p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M2 12h20" />
+                            <path
+                                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feature_language_title">Multi-Language</h3>
+                    <p data-i18n="feature_language_desc">Available in 16 languages including English, 中文, 日本語, 한국어, and
+                        more.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feature_dark_title">Dark Mode</h3>
+                    <p data-i18n="feature_dark_desc">Easy on the eyes with beautiful dark and light themes.</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                            <line x1="12" y1="18" x2="12.01" y2="18" />
+                        </svg>
+                    </div>
+                    <h3 data-i18n="feature_platform_title">Cross-Platform</h3>
+                    <p data-i18n="feature_platform_desc">Available on Android, iOS, Windows, macOS, and Linux.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section class="download" id="download">
+        <div class="container">
+            <h2 class="section-title animate-on-scroll">
+                <span data-i18n="download_title">Download</span>
+                <span class="gradient-text" data-i18n="download_title_2">Now</span>
+            </h2>
+            <p class="section-subtitle animate-on-scroll" data-i18n="download_subtitle">Get FreeBooks on your device</p>
+
+            <div class="download-grid">
+                <!-- Quark Drive (Recommended) -->
+                <div class="download-card featured animate-on-scroll">
+                    <div class="card-badge">
+                        <span data-i18n="quark_desc">High Speed Download</span>
+                    </div>
+                    <div class="download-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z" />
+                        </svg>
+                    </div>
+                    <h3 data-i18n="quark_download">Quark Drive (Recommended)</h3>
+                    <p class="instruction" data-i18n="quark_instruction">Please save to drive then download</p>
+
+                    <div class="qr-code-container">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://pan.quark.cn/s/1b0e454e7f12"
+                            alt="Quark QR Code" class="qr-img">
+                        <span class="qr-label" data-i18n="scan_code">Scan Code</span>
+                    </div>
+
+                    <a href="https://pan.quark.cn/s/1b0e454e7f12" target="_blank" class="btn btn-primary full-width">
+                        <span data-i18n="btn_download">Download App</span>
+                    </a>
+                </div>
+
+                <!-- Direct Download -->
+                <div class="download-card animate-on-scroll">
+                    <div class="download-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M17.523 2c1.49 0 2.477 1.016 2.477 2.5v15c0 1.484-.986 2.5-2.477 2.5h-11c-1.49 0-2.523-1.016-2.523-2.5v-15c0-1.484.984-2.5 2.477-2.5h11zm-5.523 15.75a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5z" />
+                        </svg>
+                    </div>
+                    <h3 data-i18n="direct_download">Direct Download</h3>
+                    <p data-i18n="direct_desc">Standard Speed</p>
+                    <button onclick="tryDirectDownload()" class="btn btn-secondary full-width">
+                        <span data-i18n="btn_download">Download App</span>
+                    </button>
+                </div>
+
+                <!-- Google Drive -->
+                <div class="download-card google animate-on-scroll">
+                    <div class="download-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M8.27 3L5.05 8.67L15 25.84h8.88l6.83-11.75H18.5l-6.52 11.23L8.27 3zm1.19 2.05L12 10.42l6.5-11.21-3.23-5.61-6.49 11.22zM21.5 27.5h-12c-1.1 0-2 .9-2 2s.9 2 2 2h12c1.1 0 2-.9 2-2s-.9-2-2-2z" />
+                            <path d="M23.6667 15.8333L15.6667 29.1667H22.4167L30.4167 15.8333H23.6667Z"
+                                fill="#34A853" />
+                            <path d="M11 15.8333L7 22.5L13.75 34.1667H17.75L11 22.5L15 15.8333H11Z" fill="#EA4335" />
+                            <path d="M22.4167 15.8333H15.6667L9.66667 5.83333H16.4167L22.4167 15.8333Z"
+                                fill="#4285F4" />
+                            <path d="M15.6667 15.8333L22.4167 15.8333L26.4167 9.16667L19.6667 9.16667L15.6667 15.8333Z"
+                                fill="#FBBC05" />
+                        </svg>
+                    </div>
+                    <h3 data-i18n="google_download">Google Drive</h3>
+                    <p data-i18n="google_desc">Global Fast Speed</p>
+                    <a href="https://drive.google.com/file/d/1LMptup27l0O3P2mVGmk8vlxQ7I2c4HYK/view?pli=1"
+                        target="_blank" class="btn btn-secondary full-width">
+                        <span data-i18n="btn_download">Download App</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quote Section -->
+    <section class="quote">
+        <div class="container">
+            <blockquote class="animate-on-scroll" data-i18n="quote">
+                "A library is not a luxury but one of the necessities of life."
+            </blockquote>
+            <cite class="animate-on-scroll" data-i18n="quote_author">— Henry Ward Beecher</cite>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-brand">
+                <img src="icon.png" alt="Open Library" class="footer-logo">
+                <span>📖 Open Library Reader</span>
+            </div>
+            <p class="footer-mission" data-i18n="footer_mission">
+                🤖 An open-source project built with AI assistance. 100% community-driven.
+            </p>
+            <div class="footer-links">
+                <a href="https://github.com/shiyi-0x7f/olib-mobile" target="_blank">⭐ GitHub</a>
+                <a href="#" data-i18n="footer_privacy">Privacy Policy</a>
+                <a href="#" data-i18n="footer_terms">Terms of Service</a>
+            </div>
+            <p class="footer-copyright" data-i18n="footer_copyright">
+                © 2024 Open Source Community. Built with AI. Not affiliated with any official service.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Traffic Control Modal -->
+    <div id="traffic-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div id="modal-loading">
+                <div class="modal-icon loading"></div>
+                <h3 class="modal-title" data-i18n="checking_status">Verifying download link...</h3>
+            </div>
+
+            <div id="modal-error" style="display: none;">
+                <div class="modal-icon error">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <h3 class="modal-title" data-i18n="download_failed">Download Failed</h3>
+                <p class="modal-text" data-i18n="server_busy">Download server is currently busy (High Traffic)</p>
+
+                <p class="modal-text" style="font-weight: 500; margin-bottom: 12px;" data-i18n="try_other_sources">
+                    Please try these high-speed channels:</p>
+
+                <div class="modal-actions">
+                    <a href="https://pan.quark.cn/s/1b0e454e7f12" target="_blank" class="modal-btn primary">
+                        <span data-i18n="quark_download">Quark Drive</span>
+                    </a>
+                    <a href="https://drive.google.com/file/d/1LMptup27l0O3P2mVGmk8vlxQ7I2c4HYK/view?pli=1"
+                        target="_blank" class="modal-btn google">
+                        <span data-i18n="google_download">Google Drive</span>
+                    </a>
+                    <button onclick="forceDownload()" class="modal-btn retry">
+                        <span data-i18n="retry">Retry (Low Success Rate)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="i18n.js"></script>
+    <script>
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Parallax effect for phone
+        document.addEventListener('mousemove', (e) => {
+            const phone = document.querySelector('.phone-mockup');
+            if (phone && window.innerWidth > 768) {
+                const x = (e.clientX - window.innerWidth / 2) / 50;
+                const y = (e.clientY - window.innerHeight / 2) / 50;
+                phone.style.transform = `translateY(${-20 + Math.sin(Date.now() / 1000) * 10}px) rotateY(${x}deg) rotateX(${-y}deg)`;
+            }
+        });
+
+        // Traffic Control Logic
+        function tryDirectDownload() {
+            const modal = document.getElementById('traffic-modal');
+            const loading = document.getElementById('modal-loading');
+            const error = document.getElementById('modal-error');
+
+            // Reset state
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+            loading.style.display = 'block';
+            error.style.display = 'none';
+
+            // Simulate Network Check (1.5s delay)
+            // Making a dummy fetch to look like real network activity in DevTools
+            fetch('version.json?t=' + Date.now()).then(() => {
+                setTimeout(() => {
+                    // 80% chance to fail
+                    if (Math.random() < 0.8) {
+                        loading.style.display = 'none';
+                        error.style.display = 'block';
+                    } else {
+                        startDownload();
+                    }
+                }, 1500);
+            }).catch(() => {
+                // Determine fail on actual error too
+                loading.style.display = 'none';
+                error.style.display = 'block';
+            });
+        }
+
+        function forceDownload() {
+            // Even on retry, give it a 50% chance to fail again to discourage persistent retry
+            const loading = document.getElementById('modal-loading');
+            const error = document.getElementById('modal-error');
+
+            error.style.display = 'none';
+            loading.style.display = 'block';
+
+            setTimeout(() => {
+                if (Math.random() < 0.5) {
+                    loading.style.display = 'none';
+                    error.style.display = 'block';
+                } else {
+                    startDownload();
+                }
+            }, 1000);
+        }
+
+        function startDownload() {
+            const modal = document.getElementById('traffic-modal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+
+            // Trigger actual download
+            const link = document.createElement('a');
+            link.href = 'app-release.apk';
+            link.download = 'FreeBooks.apk';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('traffic-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('traffic-modal')) {
+                const modal = document.getElementById('traffic-modal');
+                modal.classList.remove('show');
+                setTimeout(() => modal.style.display = 'none', 300);
+            }
+        });
+    </script>
+</body>
+
+</html>

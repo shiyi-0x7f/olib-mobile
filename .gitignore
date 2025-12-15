@@ -79,6 +79,7 @@ lib/test_api_structure.dart
 lib/test_email_verification.dart
 lib/api_dump.dart
 lib/debug_login.dart
+lib/screens/debug
 
 # Environment / Secrets
 .env

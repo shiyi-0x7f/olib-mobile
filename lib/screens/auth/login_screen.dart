@@ -286,7 +286,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                   ),
                   
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 12),
+                  
+                  // Open Source & Free badges
+                  _buildBadges(context),
+                  
+                  const SizedBox(height: 32),
                   
                   // Login Form
                   Container(
@@ -386,13 +391,127 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   
                   const SizedBox(height: 24),
                   
-                  // Note: Registration disabled - API不支持
-                  // 用户需要在官网 z-library.sk 注册账号
+                  // Hint: Use Z-Library official account
+                  _buildAccountHint(context),
                 ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+  
+  Widget _buildAccountHint(BuildContext context) {
+    final isZh = Localizations.localeOf(context).languageCode == 'zh';
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: Colors.white.withOpacity(0.8),
+                size: 16,
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  isZh 
+                      ? '请使用 Z-Library 官网账号登录'
+                      : 'Please login with your Z-Library account',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 13,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isZh 
+                ? '没有账号？请自行前往官网注册，本软件不提供注册方式。'
+                : "No account? Please register on official site. This app doesn't provide registration.",
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.6),
+              fontSize: 12,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildBadges(BuildContext context) {
+    final isZh = Localizations.localeOf(context).languageCode == 'zh';
+    
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        _buildBadge(
+          icon: Icons.code,
+          text: isZh ? '开源' : 'Open Source',
+          color: Colors.green,
+        ),
+        _buildBadge(
+          icon: Icons.money_off,
+          text: isZh ? '免费' : 'Free',
+          color: Colors.blue,
+        ),
+        _buildBadge(
+          icon: Icons.smart_toy_outlined,
+          text: isZh ? 'AI构建' : 'AI-Built',
+          color: Colors.purple,
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildBadge({
+    required IconData icon,
+    required String text,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: color.withOpacity(0.5),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

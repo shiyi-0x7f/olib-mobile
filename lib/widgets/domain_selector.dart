@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
 import 'dart:io';
 import '../providers/domain_provider.dart';
 import '../theme/app_colors.dart';
@@ -113,29 +114,41 @@ class _DomainSelectionDialogState extends ConsumerState<DomainSelectionDialog> {
 
   Future<void> _checkDomain(String domain) async {
     try {
-      final uri = Uri.tryParse('https://$domain/eapi/info/languages'); // Check API endpoint
-      if (uri == null) {
-        if (mounted) setState(() => _statusMap[domain] = false);
-        return;
-      }
+      // Check API endpoint - returns {"success":1,...} when working
+      final uri = Uri.parse('https://$domain/eapi/info/languages');
       
       final client = HttpClient();
-      client.connectionTimeout = const Duration(seconds: 5);
+      client.connectionTimeout = const Duration(seconds: 8);
+      
       try {
-        final request = await client.headUrl(uri);
-        final response = await request.close();
+        final request = await client.getUrl(uri);
+        final response = await request.close().timeout(
+          const Duration(seconds: 10),
+        );
+        
+        // Read response body
+        final bodyBytes = await response.expand((chunk) => chunk).toList();
+        final body = String.fromCharCodes(bodyBytes);
+        
+        debugPrint('Domain $domain: status=${response.statusCode}, body=${body.substring(0, body.length > 100 ? 100 : body.length)}...');
+        
         if (mounted) {
           setState(() {
-            // Accept 200-299 as success, or just connectivity
-            _statusMap[domain] = response.statusCode >= 200 && response.statusCode < 400;
+            // Check if response contains "success":1 or HTTP 2xx
+            final isSuccess = body.contains('"success":1') || 
+                              body.contains('"success": 1') ||
+                              (response.statusCode >= 200 && response.statusCode < 300);
+            _statusMap[domain] = isSuccess;
           });
         }
       } catch (e) {
+        debugPrint('Domain check failed for $domain: $e');
         if (mounted) setState(() => _statusMap[domain] = false);
       } finally {
         client.close();
       }
     } catch (e) {
+      debugPrint('Domain check error for $domain: $e');
       if (mounted) setState(() => _statusMap[domain] = false);
     }
   }

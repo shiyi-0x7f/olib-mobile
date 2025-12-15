@@ -35,7 +35,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true, 
+      extendBodyBehindAppBar: true,
       body: _screens[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -102,7 +102,7 @@ String _getGreeting(BuildContext context) {
   final hour = DateTime.now().hour;
   final locale = Localizations.localeOf(context).languageCode;
   final isZh = locale == 'zh';
-  
+
   if (hour < 6) {
     return isZh ? '夜深了，' : 'Late night,';
   } else if (hour < 12) {
@@ -134,20 +134,20 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
       _checkForUpdates();
     });
   }
-  
+
   Future<void> _checkForUpdates() async {
     final hasUpdate = await UpdateService.checkForUpdate();
-    
+
     if (!hasUpdate || !mounted) return;
-    
+
     final locale = Localizations.localeOf(context).languageCode;
     final isZh = locale == 'zh';
     final changelog = UpdateService.getChangelog(isZh ? 'zh' : 'en');
-    
+
     if (UpdateService.forceUpdate) {
       // Set blocked flag to disable features
       UpdateService.isBlocked = true;
-      
+
       // Force update - show dismissable dialog that just redirects
       AwesomeDialog(
         context: context,
@@ -156,7 +156,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
         dismissOnTouchOutside: false,
         dismissOnBackKeyPress: false,
         title: isZh ? '必须更新' : 'Update Required',
-        desc: isZh 
+        desc: isZh
             ? '发现新版本 ${UpdateService.latestVersion}\n\n$changelog\n\n当前版本已不可用，搜索和下载功能已禁用。'
             : 'New version ${UpdateService.latestVersion}\n\n$changelog\n\nThis version is no longer supported. Search and download are disabled.',
         btnOkText: isZh ? '立即更新' : 'Update Now',
@@ -180,9 +180,9 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  isZh 
-                    ? '发现新版本 ${UpdateService.latestVersion}' 
-                    : 'New version ${UpdateService.latestVersion} available',
+                  isZh
+                      ? '发现新版本 ${UpdateService.latestVersion}'
+                      : 'New version ${UpdateService.latestVersion} available',
                 ),
               ),
             ],
@@ -207,7 +207,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
           dismissDirection: DismissDirection.horizontal,
         ),
       );
-      
+
       // Mark as shown (will show again next day)
       UpdateService.dismissUpdate();
     }
@@ -235,11 +235,11 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
                     colors: [
                       AppColors.primary.withOpacity(0.05),
                       theme.scaffoldBackgroundColor,
-                    ], 
+                    ],
                   ),
                 ),
               ),
-              
+
               // Content
               SafeArea(
                 child: Padding(
@@ -294,9 +294,9 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 32),
-                      
+
                       // Search Bar Trigger
                       GestureDetector(
                         onTap: () => Navigator.of(context).pushNamed(AppRoutes.search),
@@ -341,9 +341,9 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
                           ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 40),
-                      
+
                       // Segmented Control (Visual Header)
                       Row(
                         children: [
@@ -363,7 +363,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
         const SliverPadding(padding: EdgeInsets.only(bottom: 16)),
 
         _buildBookGrid(ref.watch(mostPopularBooksProvider)),
-        
+
         const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
       ],
     );
@@ -394,7 +394,7 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
               mainAxisSpacing: 20,
             ),
             delegate: SliverChildBuilderDelegate(
-              (context, index) {
+                  (context, index) {
                 final book = books[index];
                 return BookCard(
                   book: book,
@@ -438,12 +438,12 @@ class _HomeTabState extends ConsumerState<_HomeTab> {
         borderRadius: BorderRadius.circular(30),
         boxShadow: isActive
             ? [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                )
-              ]
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          )
+        ]
             : null,
       ),
       child: Text(

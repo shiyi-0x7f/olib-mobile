@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "zlibrary_mobile" "\0"
+            VALUE "CompanyName", "Open Source Community" "\0"
+            VALUE "FileDescription", "Olib" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "zlibrary_mobile" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "zlibrary_mobile.exe" "\0"
-            VALUE "ProductName", "zlibrary_mobile" "\0"
+            VALUE "InternalName", "olib" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 Open Source Community. All rights reserved." "\0"
+            VALUE "OriginalFilename", "olib.exe" "\0"
+            VALUE "ProductName", "Olib" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
