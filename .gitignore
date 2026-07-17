@@ -1,0 +1,98 @@
+# Sensitive — do not track
+reference/*
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+pubspec.lock
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio build artifacts
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/.gradle/
+/android/local.properties
+/android/app/build/
+/android/build/
+*.jks
+*.keystore
+keystore_base64.txt
+
+# iOS
+/ios/Pods/
+/ios/.symlinks/
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Flutter.podspec
+/ios/Runner.xcworkspace/
+
+# Generated files
+*.freezed.dart
+*.g.dart
+
+# Large binary files
+*.apk
+*.ipa
+*.aab
+*.dSYM.zip
+*.dSYM
+
+# Publish page
+api_dump/
+test/
+debug/
+publish_page/
+dev_docs/*
+
+# ========================================
+# SENSITIVE SOURCE CODE - DO NOT SHARE
+# ========================================
+# 旧路径，迁到 vendor/olib_api_plugin 后已不存在；保留 ignore 防误 add
+zlibrary_api.dart
+
+# 私有依赖 — Z-Library API 客户端独立 private repo，CI 通过 SSH deploy key 拉
+# 本地需要手动 clone：git clone git@github.com:shiyi-0x7f/olib-api-plugin.git vendor/olib_api_plugin
+vendor/
+# Environment / Secrets
+.env
+.env.*
+secrets/
+*.pem
+*.p12
+
+#test scripts
+scripts/

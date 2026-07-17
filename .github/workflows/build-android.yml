@@ -1,0 +1,381 @@
+name: Build Android APK
+
+# Triggered by either:
+#   - pushing a vX.Y.Z tag       → builds + creates a GitHub Release with APKs attached
+#   - manual workflow_dispatch   → builds + uploads APKs as workflow artifact only
+#
+# Required secrets (configure in repo Settings → Secrets and variables → Actions):
+#   KEYSTORE_BASE64        base64-encoded contents of olib-release-key.jks
+#                          generate locally with: base64 -w 0 android/app/olib-release-key.jks
+#   KEYSTORE_PASSWORD      storePassword from android/key.properties
+#   KEY_PASSWORD           keyPassword from android/key.properties
+#   KEY_ALIAS              keyAlias from android/key.properties (currently "olib")
+#   OLIB_API_PLUGIN_DEPLOY_KEY  SSH private key (read-only) for the private
+#                          olib-api-plugin repo. Used to clone the package
+#                          into vendor/olib_api_plugin/ before flutter pub get.
+#                          Generate locally with:
+#                            ssh-keygen -t ed25519 -f olib_api_plugin_deploy -N ""
+#                          Then:
+#                            1. Add olib_api_plugin_deploy.pub as a READ-ONLY
+#                               Deploy key on the private olib-api-plugin repo
+#                               (repo Settings → Deploy keys → Add deploy key)
+#                            2. Paste the contents of olib_api_plugin_deploy
+#                               (the private half) into this Secret
+#                            3. Delete the local key pair after upload
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual build (for traceability)'
+        required: false
+        default: 'Manual build'
+
+permissions:
+  contents: write  # needed to create a Release on tag pushes
+
+concurrency:
+  group: build-android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.44.0'
+          cache: true
+
+      - name: Print toolchain versions
+        run: |
+          flutter --version
+          dart --version
+          java -version
+
+      - name: Read version from pubspec
+        id: pubspec
+        run: |
+          full=$(grep '^version:' pubspec.yaml | sed 's/version:\s*//' | tr -d ' ')
+          version=${full%+*}
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "full=$full" >> "$GITHUB_OUTPUT"
+          echo "Building version: $full"
+
+      - name: Verify tag matches pubspec version
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          TAG: ${{ github.ref_name }}
+          PUBSPEC_VERSION: ${{ steps.pubspec.outputs.version }}
+        run: |
+          expected="v$PUBSPEC_VERSION"
+          if [ "$TAG" != "$expected" ]; then
+            echo "::error::Tag '$TAG' does not match pubspec version '$expected'. Run scripts/bump_version.js first."
+            exit 1
+          fi
+
+      # 拉取私有 olib_api_plugin package 到 vendor/ 目录。pubspec 用 path 依赖，
+      # CI 必须在 flutter pub get 之前把代码 clone 进去。
+      - name: Set up SSH deploy key for olib_api_plugin
+        env:
+          OLIB_API_PLUGIN_DEPLOY_KEY: ${{ secrets.OLIB_API_PLUGIN_DEPLOY_KEY }}
+        run: |
+          if [ -z "$OLIB_API_PLUGIN_DEPLOY_KEY" ]; then
+            echo "::error::OLIB_API_PLUGIN_DEPLOY_KEY secret is missing. See workflow header for setup."
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          echo "$OLIB_API_PLUGIN_DEPLOY_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+          echo "SSH key installed"
+
+      - name: Clone olib_api_plugin private repo
+        run: |
+          rm -rf vendor/olib_api_plugin
+          mkdir -p vendor
+          git clone --depth 1 git@github.com:shiyi-0x7f/olib-api-plugin.git vendor/olib_api_plugin
+          echo "Cloned olib-api-plugin → vendor/olib_api_plugin/"
+          ls vendor/olib_api_plugin/lib/
+
+      - name: Generate codegen for olib_api_plugin
+        working-directory: vendor/olib_api_plugin
+        run: |
+          dart pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Cache pub
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Restore signing keystore from secrets
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::KEYSTORE_BASE64 secret is missing. Set it before running this workflow."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/olib-release-key.jks
+          # build.gradle.kts reads key.properties from the android/ dir.
+          {
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyPassword=$KEY_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "storeFile=olib-release-key.jks"
+          } > android/key.properties
+          echo "Keystore restored. File sizes:"
+          wc -c android/app/olib-release-key.jks android/key.properties
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Rename APK and compute checksum
+        id: artifacts
+        run: |
+          cd build/app/outputs/flutter-apk
+          v="${{ steps.pubspec.outputs.version }}"
+
+          # Rename to a clean, human-readable filename
+          mv app-release.apk "olib-v$v.apk"
+
+          # Drop any leftover unsigned/intermediate artifacts
+          rm -f *.apk.sha1 *-debug.apk
+
+          echo "Output files:"
+          ls -lh
+
+          sha256sum *.apk > sha256sums.txt
+          echo "--- sha256sums.txt ---"
+          cat sha256sums.txt
+
+      - name: Verify keystore signature
+        run: |
+          cd build/app/outputs/flutter-apk
+          v="${{ steps.pubspec.outputs.version }}"
+          apk="olib-v$v.apk"
+          # build-tools includes apksigner; pick the latest available version
+          apksigner_bin=$(ls -1 "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -n1)
+          if [ -z "$apksigner_bin" ]; then
+            echo "::warning::apksigner not found, skipping verification"
+            exit 0
+          fi
+          "$apksigner_bin" verify --print-certs "$apk"
+
+      - name: Cleanup signing material (defence in depth)
+        if: always()
+        run: |
+          rm -f android/app/olib-release-key.jks android/key.properties
+          echo "Signing material removed from runner."
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: olib-android-v${{ steps.pubspec.outputs.version }}
+          path: |
+            build/app/outputs/flutter-apk/olib-*.apk
+            build/app/outputs/flutter-apk/sha256sums.txt
+          retention-days: 30
+
+      # 自动从 commits 生成给用户看的 release notes：
+      # - 默认 generate_release_notes 那套 "What's Changed / New Contributors"
+      #   对没走 PR 工作流的 repo 就是空话，丢
+      # - 过滤掉运维内务（ci / build 配置 / gitignore / 拆包 / 拆文件之类），
+      #   只展示用户会感知到的改动
+      # - 措辞按 feat / fix / style 分到 "新功能 / 修复 / 体验打磨" 三栏
+      # - 随机一句开场白，避免空洞
+      - name: Compose release notes
+        if: startsWith(github.ref, 'refs/tags/v')
+        id: notes
+        run: |
+          set -e
+          TAG="${{ github.ref_name }}"
+          PREV_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^$TAG\$" | head -n 1 || true)
+          if [ -z "$PREV_TAG" ]; then
+            RANGE="$TAG"
+            COMPARE_LINK=""
+          else
+            RANGE="$PREV_TAG..$TAG"
+            COMPARE_LINK="完整变更对比：https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${TAG}"
+          fi
+
+          # 随机挑一句开场白
+          OPENINGS=(
+            "📚 程序猿又摘了几颗代码果子，给大家尝尝。"
+            "🍵 这一版熬好了，端出来给你喝一口。"
+            "🌱 这片代码田又冒出了几枝新芽。"
+            "📖 给阅读体验多浇了点水。"
+            "✨ 寻书的路上，又拐进了一条小径。"
+            "🌿 一日不 commit，胸臆无新风景。"
+            "🎈 这一版有些新东西，希望你喜欢。"
+            "🪶 一封来自 git log 的小信。"
+          )
+          OPENING="${OPENINGS[$((RANDOM % ${#OPENINGS[@]}))]}"
+
+          # ── 过滤规则 ──
+          # 1. 类型白名单：feat / fix / style / enhance / perf 全保留
+          # 2. refactor 默认保留，但 subject 含"内部关键词"的丢掉
+          # 3. chore / ci / build / docs / test / 整个不入 release notes
+          # 4. 无 prefix 的老 commit（legacy）保留
+          # 5. 全局黑名单关键词：bump version、取消跟踪、gitignore、抽出/抽到 package、
+          #    build_runner、拆分 ... widgets、ignore keystore、deploy key
+
+          # subject 含这些关键词的整行丢（与 prefix 无关）
+          INTERNAL_KEYWORDS='取消跟踪|gitignore|build_runner|拆分.*widgets|bump version|deploy key|keystore_base64|抽.*[Pp]ackage|抽 .*olib_api_plugin|pubspec|analyze 警告|清理依赖|类型化|测速时机'
+          # 这些 scope 的 commit 一律丢（属于内务，不论 prefix 是 feat/fix/refactor）
+          INTERNAL_SCOPES='^(build|ci|deps|test|docs|release|gradle|kgp)$'
+
+          # 提取 "{type}(scope): subject" 中的 subject 部分（去掉 prefix）
+          # 留一个"领域提示"如 prescriber → 寻书 / auth → 登录，便于读者定位
+          # 没匹配到的 scope 就直接显示 subject 主体
+          format_line() {
+            local line="$1"
+            # 去掉 prefix "type(scope): " 或 "type: "
+            local clean=$(echo "$line" | sed -E 's/^[a-z]+(\([^)]*\))?:[[:space:]]*//')
+            # 提取 scope 用作中文标签
+            local scope=$(echo "$line" | sed -nE 's/^[a-z]+\(([^)]+)\):.*/\1/p')
+            local label=""
+            case "$scope" in
+              prescriber) label="**寻书**：" ;;
+              auth)       label="**登录**：" ;;
+              theme)      label="**主题**：" ;;
+              update)     label="**更新**：" ;;
+              books)      label="**书库**：" ;;
+              ai)         label="**AI**：" ;;
+              settings)   label="**设置**：" ;;
+              i18n)       label="**多语言**：" ;;
+              "")         label="" ;;
+              *)          label="" ;;
+            esac
+            echo "- $label$clean"
+          }
+
+          # 收集符合条件的 commits 到三类
+          FEATURES=""
+          FIXES=""
+          STYLES=""
+
+          while IFS= read -r subject; do
+            [ -z "$subject" ] && continue
+            # 黑名单关键词丢
+            if echo "$subject" | grep -qE "$INTERNAL_KEYWORDS"; then
+              continue
+            fi
+            # Merge / Revert 丢
+            if echo "$subject" | grep -qE "^(Merge|Revert)"; then
+              continue
+            fi
+            # scope 是内务类的丢（如 fix(build): / feat(ci): 之类）
+            scope_in_subject=$(echo "$subject" | sed -nE 's/^[a-z]+\(([^)]+)\):.*/\1/p')
+            if [ -n "$scope_in_subject" ] && echo "$scope_in_subject" | grep -qE "$INTERNAL_SCOPES"; then
+              continue
+            fi
+            # 类型路由
+            if echo "$subject" | grep -qE "^(feat|enhance)(\(|:)"; then
+              FEATURES="$(printf '%s\n%s' "$FEATURES" "$(format_line "$subject")")"
+            elif echo "$subject" | grep -qE "^fix(\(|:)"; then
+              FIXES="$(printf '%s\n%s' "$FIXES" "$(format_line "$subject")")"
+            elif echo "$subject" | grep -qE "^(style|perf)(\(|:)"; then
+              STYLES="$(printf '%s\n%s' "$STYLES" "$(format_line "$subject")")"
+            elif echo "$subject" | grep -qE "^refactor(\(|:)"; then
+              STYLES="$(printf '%s\n%s' "$STYLES" "$(format_line "$subject")")"
+            elif echo "$subject" | grep -qE "^(chore|ci|build|docs|test)(\(|:)"; then
+              continue
+            else
+              FEATURES="$(printf '%s\n%s' "$FEATURES" "- $subject")"
+            fi
+          done < <(git log --no-merges --pretty=format:"%s" "$RANGE" 2>/dev/null)
+
+          # 去掉每段开头的空行
+          FEATURES=$(echo "$FEATURES" | sed '/^$/d')
+          FIXES=$(echo "$FIXES" | sed '/^$/d')
+          STYLES=$(echo "$STYLES" | sed '/^$/d')
+
+          # 拼装 body
+          {
+            echo "$OPENING"
+            echo ""
+            if [ -n "$FEATURES" ]; then
+              echo "### ✨ 新功能"
+              echo "$FEATURES"
+              echo ""
+            fi
+            if [ -n "$FIXES" ]; then
+              echo "### 🛠 修复"
+              echo "$FIXES"
+              echo ""
+            fi
+            if [ -n "$STYLES" ]; then
+              echo "### 🎨 体验打磨"
+              echo "$STYLES"
+              echo ""
+            fi
+            # 如果三栏全空，至少留个有趣的占位，不至于空气
+            if [ -z "$FEATURES" ] && [ -z "$FIXES" ] && [ -z "$STYLES" ]; then
+              echo "这次没什么新故事，只是默默把后台又擦干净了一遍。下一版见。"
+              echo ""
+            fi
+            if [ -n "$COMPARE_LINK" ]; then
+              echo "---"
+              echo ""
+              echo "$COMPARE_LINK"
+            fi
+          } > release_notes.md
+
+          echo "Generated release notes:"
+          echo "─────────────────────────"
+          cat release_notes.md
+          echo "─────────────────────────"
+
+      - name: Create GitHub Release (tag pushes only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Olib ${{ github.ref_name }}
+          body_path: release_notes.md
+          fail_on_unmatched_files: true
+          files: |
+            build/app/outputs/flutter-apk/olib-*.apk
+            build/app/outputs/flutter-apk/sha256sums.txt

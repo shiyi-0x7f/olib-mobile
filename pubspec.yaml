@@ -1,0 +1,166 @@
+name: olib_mobile
+description: "Olib: An open-source ebook reader built with AI assistance. Third-party client."
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.3.0+10300
+
+environment:
+  sdk: ^3.10.0
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # UI & Icons
+  cupertino_icons: ^1.0.8
+  google_fonts: ^6.2.1
+  cached_network_image: ^3.3.1
+  flutter_slidable: ^3.1.0
+  dropdown_button2: ^2.3.9
+  awesome_dialog: ^3.3.0
+  
+  # State Management
+  flutter_riverpod: ^2.5.1
+  
+  # HTTP & Network
+  dio: ^5.4.3+1
+  dio_cookie_manager: ^3.1.1
+  cookie_jar: ^4.0.8
+  http: ^1.2.0
+  
+  # Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  path_provider: ^2.1.4
+  permission_handler: ^12.0.1
+  open_filex: ^4.4.0
+  share_plus: ^13.1.0
+  url_launcher: ^6.2.5
+  android_intent_plus: ^6.0.0
+
+  package_info_plus: ^10.1.0
+  device_info_plus: ^13.1.0
+  file_picker: ^12.0.0-beta.4
+  flutter_inappwebview: ^6.1.5
+  flutter_inappwebview_windows: ^0.6.0
+  
+  # Data Models
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+  mobile_scanner: ^7.1.4
+  qr_flutter: ^4.1.0
+
+  # 私有 Z-API 客户端 + 数据模型,不对外开放。源码在 vendor/olib_api_plugin/
+  # （本地 + CI 都从 private repo 拉取，vendor/ 在 .gitignore 里）
+  olib_api_plugin:
+    path: vendor/olib_api_plugin
+  receive_sharing_intent: ^1.8.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Lints
+  flutter_lints: ^5.0.0
+  
+  # Code Generation
+  build_runner: ^2.4.9
+  freezed: ^2.5.2
+  json_serializable: ^6.7.1
+  
+  # App Icon Generator
+  flutter_launcher_icons: ^0.14.2
+  msix: ^3.16.12
+
+# App Icon Configuration
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/z.png"
+  adaptive_icon_background: "#6C5CE7"
+  adaptive_icon_foreground: "assets/icons/z.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/icons/z.png"
+  windows:
+    generate: true
+    image_path: "assets/icons/z.png"
+  macos:
+    generate: true
+    image_path: "assets/icons/z.png"
+
+# MSIX Packaging Configuration for Windows
+msix_config:
+  display_name: Olib
+  publisher: CN=Olib Team
+  publisher_display_name: Olib Team
+  identity_name: com.olib.mobile
+  msix_version: 1.3.0.0
+  logo_path: assets/icons/z.png
+  capabilities: internetClient, internetClientServer
+  languages: en-us, zh-cn, ja-jp, ko-kr
+  
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/icons/
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package

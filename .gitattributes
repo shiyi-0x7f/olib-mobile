@@ -1,0 +1,2 @@
+# Mark .gitignore as always using ours during merge
+.gitignore merge=ours
